@@ -175,19 +175,27 @@
         .then(response => response.json())
         .then(response => {
           if (response.success) {
+            
+            // ---- เพิ่มเสียงเมื่อบันทึกสำเร็จตรงนี้ ----
+            speakText("บันทึกเรียบร้อยแล้วครับ"); 
+            
             Swal.fire({
               icon: 'success', title: 'บันทึกสำเร็จ', html: `<b>ชื่อ-สกุล:</b> ${response.name}<br><b>ชั้นเรียน:</b> ${response.className}`,
               showConfirmButton: false, timer: 3000, timerProgressBar: true
-            }).then(() => resetInputAndUnlock());
+            }).then(() => resetInputAndUnlock()); [cite: 123]
           } else {
+            
+            // ---- เพิ่มเสียงเมื่อไม่พบข้อมูลตรงนี้ ----
+            speakText("ไม่พบข้อมูล"); 
+            
             Swal.fire({
               icon: 'error', title: 'ข้อผิดพลาด', text: response.message,
               showConfirmButton: false, timer: 3000, timerProgressBar: true
-            }).then(() => resetInputAndUnlock());
+            }).then(() => resetInputAndUnlock()); [cite: 123]
           }
         })
         .catch(error => {
-          Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error').then(() => resetInputAndUnlock());
+          Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error').then(() => resetInputAndUnlock()); [cite: 124]
         });
     }
 
@@ -264,6 +272,15 @@
       if(globalData.length === 0) return Swal.fire('แจ้งเตือน', 'ไม่มีข้อมูลให้ส่งออก', 'info');
       let wb = XLSX.utils.table_to_book(document.getElementById("dataTable"), {sheet: "ข้อมูลเข้าใช้"});
       XLSX.writeFile(wb, "elibrary-dashboard-data.xlsx");
+    }
+
+    // ฟังก์ชันสำหรับอ่านออกเสียงภาษาไทย
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'th-TH'; // กำหนดให้เป็นเสียงภาษาไทย
+        window.speechSynthesis.speak(utterance);
+      }
     }
   </script>
 </body>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>บันทึกการเข้าใช้ห้อง e-library</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  
+  <style>
+    body { font-family: 'Prompt', sans-serif; background-color: #f0f4f8; color: #333; }
+    .main-container { max-width: 900px; margin: 30px auto; padding: 0 15px; }
+    .card-custom { border: none; border-radius: 16px; box-shadow: 0 8px 24px rgba(149, 157, 165, 0.15); background: #fff; }
+    .logo-img { max-width: 140px; margin-bottom: 20px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+    .input-studentid { font-size: 2rem; text-align: center; letter-spacing: 8px; border-radius: 12px; font-weight: 600; color: #0d6efd; border: 2px solid #dee2e6; }
+    .input-studentid:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); }
+    .nav-pills .nav-link { color: #555; border-radius: 10px; margin: 0 5px; font-weight: 500; }
+    .nav-pills .nav-link.active { background-color: #0d6efd; color: white; }
+    .dashboard-card { border-radius: 12px; padding: 20px; color: white; height: 100%; }
+    .bg-today { background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%); }
+    .bg-total { background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%); }
+    .table-responsive { border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .table thead th { background-color: #f8f9fa; border-bottom: 2px solid #e9ecef; }
+    @media (max-width: 576px) {
+      .card-custom { padding: 1.25rem !important; }
+      .input-studentid { font-size: 1.6rem; letter-spacing: 5px; }
+      .dashboard-card { padding: 15px; }
+      .dashboard-card h5 { font-size: 1rem; }
+      .dashboard-card h2 { font-size: 1.6rem; }
+      .table th, .table td { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-container">
+    <ul class="nav nav-pills justify-content-center mb-4" id="pills-tab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pills-record-tab" data-bs-toggle="pill" data-bs-target="#pills-record" type="button" role="tab" aria-selected="true">
+          <i class="fa-solid fa-pen-to-square me-2"></i>บันทึกการเข้าใช้
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-data-tab" data-bs-toggle="pill" data-bs-target="#pills-data" type="button" role="tab" aria-selected="false" onclick="loadData()">
+          <i class="fa-solid fa-chart-line me-2"></i>ข้อมูล / แดชบอร์ด
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="pills-tabContent">
+      <div class="tab-pane fade show active" id="pills-record" role="tabpanel" tabindex="0">
+        <div class="card card-custom p-4 p-md-5 text-center">
+          <div><img src="https://cdn.jsdelivr.net/gh/nok68357/image/LogoRakServices.png" alt="Logo" class="logo-img"></div>
+          <h2 class="mb-4 fw-bold text-primary">บันทึกเข้าห้อง e-library</h2>
+          <p class="text-muted mb-4">นำ QR Code มาส่องที่กล้อง หรือพิมพ์เลขประจำตัว 5 หลัก (บันทึกอัตโนมัติ)</p>
+          <div class="row justify-content-center">
+            <div class="col-12 col-md-8">
+              <div id="qr-reader" class="mb-4" style="width: 100%; max-width: 400px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
+              <input type="text" id="studentId" class="form-control input-studentid mb-4" placeholder="00000" maxlength="5" inputmode="numeric" autocomplete="off">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="pills-data" role="tabpanel" tabindex="0">
+        <div class="row mb-4 g-3">
+          <div class="col-6">
+            <div class="dashboard-card bg-today text-center shadow-sm">
+              <h5 class="mb-1"><i class="fa-regular fa-calendar-check me-2"></i>วันนี้</h5>
+              <h2 class="fw-bold mb-0" id="countToday">0</h2><small>คน</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="dashboard-card bg-total text-center shadow-sm">
+              <h5 class="mb-1"><i class="fa-solid fa-users me-2"></i>ทั้งหมด</h5>
+              <h2 class="fw-bold mb-0" id="countTotal">0</h2><small>คน</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-custom p-4">
+          <div class="row mb-3 g-3 align-items-center">
+            <div class="col-12 col-md-6">
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" id="searchInput" class="form-control" placeholder="ค้นหา รหัส, ชื่อ, ชั้น, วันที่..." onkeyup="filterData()">
+              </div>
+            </div>
+            <div class="col-12 col-md-6 text-md-end text-center mt-3 mt-md-0">
+              <button class="btn btn-success me-2" onclick="exportExcel()"><i class="fa-solid fa-file-excel me-1"></i> Excel</button>
+              <button class="btn btn-secondary" onclick="loadData()"><i class="fa-solid fa-arrows-rotate me-1"></i> รีเฟรช</button>
+            </div>
+          </div>
+          <div class="table-responsive border">
+            <table class="table table-hover align-middle text-nowrap mb-0" id="dataTable">
+              <thead>
+                <tr>
+                  <th class="text-center" width="10%">ลำดับ</th><th width="20%">วันที่</th>
+                  <th class="text-center" width="20%">เลขประจำตัว</th><th width="35%">ชื่อ สกุล</th><th class="text-center" width="15%">ชั้น</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr><td colspan="5" class="text-center text-muted py-4">กำลังโหลดข้อมูล...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+  <script>
+    // ==========================================================
+    // สำคัญมาก: นำ URL ของ Web App (Google Apps Script) มาวางที่นี่
+    // ==========================================================
+    const API_URL = "https://script.google.com/macros/s/AKfycbw0asXJfZKYWGjW6qSwzKmRpdPVxx1Ktx04L3XMAgaUQu8bTH2UTmU1S2r4mXh7MVyT3A/exec"; 
+
+    let globalData = []; 
+    let isSaving = false; 
+    let html5QrCode;
+
+    window.onload = function() {
+      document.getElementById('studentId').focus();
+      initAutoScanner(); 
+    };
+
+    function initAutoScanner() {
+      html5QrCode = new Html5Qrcode("qr-reader");
+      html5QrCode.start(
+        { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess, onScanFailure
+      ).catch((err) => {
+        document.getElementById('qr-reader').innerHTML = `
+          <div class="p-4 bg-light text-danger" style="border: 1px dashed #dc3545; border-radius: 12px;">
+            <i class="fa-solid fa-camera-slash fs-2 mb-2"></i><br>ไม่สามารถเปิดกล้องได้<br><small>กรุณาตรวจสอบสิทธิ์การใช้งานกล้อง</small>
+          </div>`;
+      });
+    }
+
+    function onScanSuccess(decodedText) {
+      if (isSaving) return; 
+      const scannedId = decodedText.replace(/[^0-9]/g, '').substring(0, 5);
+      if (scannedId.length === 5) {
+        document.getElementById('studentId').value = scannedId;
+        saveRecord(); 
+      }
+    }
+    function onScanFailure(error) {}
+
+    document.getElementById('studentId').addEventListener('input', function (e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+      if (this.value.length === 5 && !isSaving) saveRecord();
+    });
+
+    function saveRecord() {
+      if (isSaving) return; 
+      const inputEl = document.getElementById('studentId');
+      const studentId = inputEl.value.trim();
+      if (studentId.length !== 5) return;
+      isSaving = true; 
+
+      Swal.fire({ title: 'กำลังตรวจสอบข้อมูล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+      
+      // ดึงข้อมูลผ่าน API แทน google.script.run
+      fetch(`${API_URL}?action=saveData&studentId=${studentId}`)
+        .then(response => response.json())
+        .then(response => {
+          if (response.success) {
+            Swal.fire({
+              icon: 'success', title: 'บันทึกสำเร็จ', html: `<b>ชื่อ-สกุล:</b> ${response.name}<br><b>ชั้นเรียน:</b> ${response.className}`,
+              showConfirmButton: false, timer: 3000, timerProgressBar: true
+            }).then(() => resetInputAndUnlock());
+          } else {
+            Swal.fire({
+              icon: 'error', title: 'ข้อผิดพลาด', text: response.message,
+              showConfirmButton: false, timer: 3000, timerProgressBar: true
+            }).then(() => resetInputAndUnlock());
+          }
+        })
+        .catch(error => {
+          Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบได้', 'error').then(() => resetInputAndUnlock());
+        });
+    }
+
+    function resetInputAndUnlock() {
+      const inputEl = document.getElementById('studentId');
+      inputEl.value = ''; isSaving = false; inputEl.focus();
+    }
+
+    function parseDateStr(dateStr) {
+      if (!dateStr || dateStr === '-') return 0;
+      const parts = dateStr.split(/[\s/:]+/);
+      if (parts.length >= 3) {
+        return new Date(parts[2], parts[1] - 1, parts[0], parts[3]||0, parts[4]||0, parts[5]||0).getTime();
+      }
+      return 0;
+    }
+
+    function loadData() {
+      document.getElementById('tableBody').innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">กำลังโหลดข้อมูล <i class="fa-solid fa-spinner fa-spin"></i></td></tr>';
+      
+      fetch(`${API_URL}?action=getData`)
+        .then(response => response.json())
+        .then(response => {
+          if (response.success) {
+            globalData = response.data;
+            globalData.sort((a, b) => parseDateStr(b.timestamp) - parseDateStr(a.timestamp));
+            updateDashboard();
+            renderTable(globalData);
+          } else {
+            Swal.fire('ข้อผิดพลาด', response.message, 'error');
+          }
+        })
+        .catch(error => Swal.fire('ข้อผิดพลาด', 'โหลดข้อมูลล้มเหลว', 'error'));
+    }
+
+    function renderTable(dataArray) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      if (dataArray.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">ไม่พบข้อมูล</td></tr>';
+        return;
+      }
+      dataArray.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="text-center">${index + 1}</td><td>${item.timestamp||'-'}</td><td class="text-center fw-bold text-primary">${item.studentId||'-'}</td><td>${item.name||'-'}</td><td class="text-center">${item.className ? `<span class="badge bg-secondary">${item.className}</span>` : '-'}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterData() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = globalData.filter(item => 
+        (item.studentId && item.studentId.toString().includes(query)) || (item.timestamp && item.timestamp.toLowerCase().includes(query)) ||
+        (item.name && item.name.toString().toLowerCase().includes(query)) || (item.className && item.className.toString().toLowerCase().includes(query))
+      );
+      renderTable(filtered);
+    }
+
+    function updateDashboard() {
+      const d = new Date();
+      const todayStr = ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear();
+      let countToday = 0;
+      globalData.forEach(item => { if(item.timestamp && item.timestamp.substring(0, 10) === todayStr) countToday++; });
+      animateValue("countToday", countToday); animateValue("countTotal", globalData.length);
+    }
+
+    function animateValue(id, end) {
+      const obj = document.getElementById(id); let current = parseInt(obj.innerText) || 0;
+      if (current === end) return; const step = end > current ? 1 : -1;
+      const timer = setInterval(() => { current += step; obj.innerText = current; if (current === end) clearInterval(timer); }, 20);
+    }
+
+    function exportExcel() {
+      if(globalData.length === 0) return Swal.fire('แจ้งเตือน', 'ไม่มีข้อมูลให้ส่งออก', 'info');
+      let wb = XLSX.utils.table_to_book(document.getElementById("dataTable"), {sheet: "ข้อมูลเข้าใช้"});
+      XLSX.writeFile(wb, "elibrary-dashboard-data.xlsx");
+    }
+  </script>
+</body>
+</html>
